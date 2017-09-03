@@ -1,28 +1,31 @@
 <div class="container">
   <hr />
   <div class="row">
-    <div class="col-12 col-md-4">
-      <label>String</label>
+    <div class="col-12 col-md-8 col-xl-4">
+      <label>Text</label>
       <input type="text" class="form-control" [(ngModel)]="text">
     </div>
-    <div class="col-12 col-md-2">
-      <label>Ausgangssprache</label>
+    <div class="col-12 col-md-4 col-xl-2">
+      <label>Source language</label>
       <select [(ngModel)]="sourceLanguage" class="form-control">
         <option *ngFor="let language of languages" value="{{language.code}}">{{language.name}}</option>
       </select>
     </div>
-    <div class="col-12 col-md-2">
-      <label>Zielsprache</label>
+    <div class="col-12 col-md-4 col-xl-2">
+      <label>Destination language</label>
       <select [(ngModel)]="destinationLanguage" class="form-control">
         <option *ngFor="let language of languages" value="{{language.code}}">{{language.name}}</option>
       </select>
     </div>
-    <div class="col-12 col-md-2">
-      <label>Zwischensprachen</label>
+    <div class="col-12 col-md-4 col-xl-2">
+      <label>Unnecessary steps</label>
       <input type="number" class="form-control" [(ngModel)]="languageCount">
     </div>
-    <div class="col-12 col-md-2">
-      <button type="button" class="btn btn-primary" (click)="translate()">Übersetzen</button>
+    <div class="col-12 col-md-4 col-xl-2">
+      <button type="button" class="btn btn-primary send" (click)="translate()" [disabled]="loading">
+        <i *ngIf="loading" class="fa fa-spinner fa-pulse fa-fw" aria-hidden="true"></i>
+        Translate
+      </button>
     </div>
   </div>
   <hr />
@@ -30,12 +33,16 @@
     <div class="col-12 col-md-4" *ngFor="let translation of history">
       <div class="card">
         <div class="card-header">
-          <h4>{{printTranslationChain(translation.chain)}}</h4>
+          <h4 [innerHTML]="printTranslationSummary(translation.chain)"></h4>
+          <button class="btn btn-sm btn-secondary" data-toggle="tooltip" data-html="true" data-placement="bottom"
+                  title="{{printTranslationChain(translation.chain)}}">
+            {{translation.chain.length - 1}} steps
+          </button>
         </div>
         <div class="card-block">
           <p class="card-text">
             <b>Text: </b>{{translation.text}}<br />
-            <b>Übersetzung: </b>{{translation.translation}}<br />
+            <b>Translation: </b>{{translation.translation}}<br />
           </p>
         </div>
       </div>

@@ -116,6 +116,7 @@ export class AppComponent {
   destinationLanguage;
   languageCount = 0;
   history = [];
+  loading = false;
 
   constructor(private http: HttpClient) {}
 
@@ -129,6 +130,8 @@ export class AppComponent {
     const http = this.http;
     const original = this.text;
 
+    this.loading = true;
+
     function loadTranslationStep(step, text) {
       let to;
       if (step === translationSteps) {
@@ -141,13 +144,14 @@ export class AppComponent {
 
       http.get(url + '&sl=' + from + '&tl=' + to + '&dt=t&q=' + text).subscribe((data: any) => {
         if (step === translationSteps) {
-          this.history.push({
+          this.history.unshift({
             text: original,
             sourceLanguage: source,
             destinationLanguage: destination,
             chain: chain,
             translation: data[0][0][0]
           });
+          this.loading = false;
         } else {
           loadTranslationStep.call(this, step + 1, data[0][0][0]);
         }
@@ -163,8 +167,17 @@ export class AppComponent {
     let string = language.name;
     chain.forEach((element) => {
       language = map.get(element);
-      string += ' -> ' + language.name;
+      string += ' <i class="fa fa-arrow-circle-right" aria-hidden="true"></i> ' + language.name;
     });
     return string;
+  }
+
+  printTranslationSummary(chainRef) {
+    const chain = chainRef.slice();
+    const map = new Map(this.languages.map(el => [el.code, el]));
+    let source, destination: any;
+    source = map.get(chain[0]);
+    destination = map.get(chain[chain.length - 1]);
+    return source.name + ' <i class="fa fa-arrow-circle-right" aria-hidden="true"></i> ' + destination.name;
   }
 }
