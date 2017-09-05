@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { NgbProgressbarConfig } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-root',
@@ -116,9 +117,17 @@ export class AppComponent {
   destinationLanguage;
   languageCount = 0;
   history = [];
-  loading = false;
+  status = {
+    loading: false,
+    steps: 0,
+    finishedSteps: 0,
+  };
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, config: NgbProgressbarConfig) {
+    config.striped = true;
+    config.animated = true;
+    config.type = 'success';
+  }
 
   translate() {
     const url = 'https://translate.googleapis.com/translate_a/single?client=gtx';
@@ -130,7 +139,9 @@ export class AppComponent {
     const http = this.http;
     const original = this.text;
 
-    this.loading = true;
+    this.status.loading = true;
+    this.status.steps = translationSteps + 1;
+    this.status.finishedSteps = 0;
 
     function loadTranslationStep(step, text) {
       let to;
@@ -151,8 +162,9 @@ export class AppComponent {
             chain: chain,
             translation: data[0][0][0]
           });
-          this.loading = false;
+          this.status.loading = false;
         } else {
+          this.status.finishedSteps++;
           loadTranslationStep.call(this, step + 1, data[0][0][0]);
         }
       });
