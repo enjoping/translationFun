@@ -127,6 +127,13 @@ export class AppComponent {
     config.striped = true;
     config.animated = true;
     config.type = 'success';
+
+    if (typeof(Storage) !== 'undefined') {
+      const history = JSON.parse(localStorage.getItem('translator_history'));
+      if (history) {
+        this.history = history;
+      }
+    }
   }
 
   translate() {
@@ -160,8 +167,12 @@ export class AppComponent {
             sourceLanguage: source,
             destinationLanguage: destination,
             chain: chain,
-            translation: data[0][0][0]
+            translation: data[0][0][0],
+            time: new Date()
           });
+          if (typeof(Storage) !== 'undefined') {
+            localStorage.setItem('translator_history', JSON.stringify(this.history));
+          }
           this.status.loading = false;
         } else {
           this.status.finishedSteps++;
