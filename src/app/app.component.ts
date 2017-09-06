@@ -134,7 +134,7 @@ export class AppComponent implements OnInit {
   {
     title: 'Loading indicator',
     date: new Date(2017, 8, 5),
-    description: 'You never new how long to wait until your translation finally finished. It looked like the page is ' +
+    description: 'You never knew how long to wait until your translation finally finished. It looked like the page is ' +
     'just ignoring you instead of translating your stuff. Well, this has changed now! A fancy loading indicator tells ' +
     'you exactly how long you still have to wait now.',
   }];
