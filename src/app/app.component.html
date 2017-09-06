@@ -42,7 +42,8 @@
         <div class="card-header">
           <h4 [innerHTML]="printTranslationSummary(translation.chain)"></h4>
           <button class="btn btn-sm btn-secondary" data-toggle="tooltip" data-html="true" data-placement="bottom"
-                  title="{{printTranslationChain(translation.chain)}}">
+                  title="{{printTranslationChain(translation.chain)}}" placement="top"
+                  ngbTooltip="In a short time you will be able to see the full way of your text.">
             {{translation.chain.length - 1}} steps
           </button>
         </div>
@@ -56,3 +57,21 @@
     </div>
   </div>
 </div>
+
+
+<ng-template #news let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <h4 class="modal-title">
+      What's new
+      <i class="fa fa-bullhorn" aria-hidden="true"></i>
+    </h4>
+  </div>
+  <div class="modal-body">
+    <div *ngFor="let change of changelog">
+      <small><i>{{change.date | date:'fullDate'}}</i></small>
+      <h3>{{change.title}}</h3>
+      <p>{{change.description}}</p>
+      <hr />
+    </div>
+  </div>
+</ng-template>

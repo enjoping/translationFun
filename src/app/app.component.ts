@@ -1,13 +1,16 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild, TemplateRef, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { NgbProgressbarConfig } from '@ng-bootstrap/ng-bootstrap';
+import { NgbProgressbarConfig, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
+  @ViewChild('news')
+  private newsTpl: TemplateRef<any>;
+
   text = '';
   languages: any = [
     { name: 'Albanian', code: 'sq' },
@@ -122,13 +125,37 @@ export class AppComponent {
     steps: 0,
     finishedSteps: 0,
   };
+  changelog = [{
+    title: 'Local History',
+    date: new Date(2017, 8, 6),
+    description: 'Are you also tired of losing all your cool translations when reloading the page? These times are ' +
+    'over now. A history is now saved to your browser and loaded every time you visit us again.',
+  },
+  {
+    title: 'Loading indicator',
+    date: new Date(2017, 8, 5),
+    description: 'You never new how long to wait until your translation finally finished. It looked like the page is ' +
+    'just ignoring you instead of translating your stuff. Well, this has changed now! A fancy loading indicator tells ' +
+    'you exactly how long you still have to wait now.',
+  }];
 
-  constructor(private http: HttpClient, config: NgbProgressbarConfig) {
+  constructor(private http: HttpClient, private modalService: NgbModal, config: NgbProgressbarConfig) {
     config.striped = true;
     config.animated = true;
     config.type = 'success';
+  }
 
+  ngOnInit() {
     if (typeof(Storage) !== 'undefined') {
+      const lastVisit = new Date(localStorage.getItem('translator_last_visit'));
+      console.log(lastVisit);
+      if (this.changelog[0].date > lastVisit) {
+        window.setTimeout(() => {
+          this.modalService.open(this.newsTpl);
+        }, 1000);
+      }
+      localStorage.setItem('translator_last_visit', new Date().toDateString());
+
       const history = JSON.parse(localStorage.getItem('translator_history'));
       if (history) {
         this.history = history;
