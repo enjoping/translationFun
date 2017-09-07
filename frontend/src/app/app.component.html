@@ -1,0 +1,192 @@
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+  <a class="navbar-brand" href="#">Lächerbar Translator</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+    <ul class="navbar-nav mr-auto">
+      <!--<li class="nav-item active">
+        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Link</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link disabled" href="#">Disabled</a>
+      </li>
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Dropdown</a>
+        <div class="dropdown-menu" aria-labelledby="dropdown01">
+          <a class="dropdown-item" href="#">Action</a>
+          <a class="dropdown-item" href="#">Another action</a>
+          <a class="dropdown-item" href="#">Something else here</a>
+        </div>
+      </li>-->
+    </ul>
+    <form class="form-inline my-2 my-lg-0">
+      <button class="btn btn-outline-success my-2 my-sm-0" (click)="open(loginModal)" *ngIf="loginStatus != 2; else alreadyLoggedIn">Login</button>
+      <ng-template #alreadyLoggedIn>
+        <button class="btn btn-outline-success my-2 my-sm-0">My Account</button>
+      </ng-template>
+    </form>
+  </div>
+</nav>
+<div class="container main">
+  <hr />
+  <div class="row">
+    <div class="col-12 col-md-12 col-xl-3">
+      <label>Text</label>
+      <input type="text" class="form-control" [(ngModel)]="text">
+    </div>
+    <div class="col-5 col-xl-2">
+      <label>Source language</label>
+      <select [(ngModel)]="sourceLanguage" class="form-control">
+        <option *ngFor="let language of languages" value="{{language.code}}">{{language.name}}</option>
+      </select>
+    </div>
+    <div class="col-2 col-xl-1">
+      <button type="button" class="btn btn-primary send" (click)="changeLanguages()" >
+        <i class="fa fa-exchange" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="col-5 col-xl-2">
+      <label>Destination language</label>
+      <select [(ngModel)]="destinationLanguage" class="form-control">
+        <option *ngFor="let language of languages" value="{{language.code}}">{{language.name}}</option>
+      </select>
+    </div>
+    <div class="col-12 col-md-4 col-xl-2">
+      <label>Unnecessary steps</label>
+      <input type="number" class="form-control" [(ngModel)]="languageCount">
+    </div>
+    <div class="col-6 col-md-2 col-xl-1">
+      <button type="button" class="btn btn-primary send" (click)="randomize()">
+        <i class="fa fa-random" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="col-6 col-md-2 col-xl-1">
+      <button type="button" class="btn btn-primary send" (click)="translate()" [disabled]="status.loading">
+        <i *ngIf="status.loading" class="fa fa-spinner fa-pulse fa-fw" aria-hidden="true"></i>
+        Translate
+      </button>
+    </div>
+  </div>
+  <hr />
+  <div class="row loading">
+    <div class="col-12">
+      <ngb-progressbar value="{{status.finishedSteps * 100 / status.steps}}" *ngIf="status.loading">
+        {{ status.finishedSteps }} step finished
+      </ngb-progressbar>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-12 col-md-4 translation" *ngFor="let translation of history">
+      <div class="card">
+        <div class="card-header">
+          <h4 [innerHTML]="printTranslationSummary(translation.chain)"></h4>
+          <button class="btn btn-sm btn-secondary" data-toggle="tooltip" data-html="true" data-placement="bottom"
+                  title="{{printTranslationChain(translation.chain)}}" placement="top"
+                  ngbTooltip="In a short time you will be able to see the full way of your text.">
+            {{translation.chain.length - 1}} steps
+          </button>
+          <br />
+          <ngb-rating (rateChange)="updateRating()" [(rate)]="translation.rating" [starTemplate]="t" max="5"></ngb-rating>
+        </div>
+        <div class="card-block">
+          <p class="card-text">
+            <b>Text: </b>{{translation.text}}<br />
+            <b>Translation: </b>{{translation.translation}}<br />
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<ng-template #news let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <h4 class="modal-title">
+      What's new
+      <i class="fa fa-bullhorn" aria-hidden="true"></i>
+    </h4>
+  </div>
+  <div class="modal-body">
+    <div *ngFor="let change of changelog">
+      <div *ngIf="change.date > lastVisit">
+        <small><i>{{change.date | date:'fullDate'}}</i></small>
+        <h3>{{change.title}}</h3>
+        <p>{{change.description}}</p>
+        <hr/>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #t let-fill="fill">
+  <span *ngIf="fill === 100"><img src="/assets/banana.svg"></span>
+  <span *ngIf="fill === 0"><img src="/assets/banana-o.svg"></span>
+</ng-template>
+
+<ng-template #loginModal let-c="close" let-d="dismiss">
+  <div class="modal-dialog" *ngIf="loginModalMode == 0; else registerTemplate">
+    <div class="loginmodal-container">
+      <h1>Login to Your Account</h1><br>
+      <ngb-alert [dismissible]="true" *ngIf="loginStatus == 1" type="danger">
+        Something went wrong. Please check your credentials or try again later.
+      </ngb-alert>
+      <ngb-alert [dismissible]="true" *ngIf="loginStatus == 2" type="info">
+        You are successfully logged into your account. Have fun with our tool.
+      </ngb-alert>
+      <form>
+        <input type="text" name="user" placeholder="Username" [(ngModel)]="usernameFieldLogin">
+        <input type="password" name="pass" placeholder="Password" [(ngModel)]="passwordFieldLogin">
+        <input type="submit" name="login" class="login loginmodal-submit" value="Login" (click)="login()">
+      </form>
+
+      <div class="login-help">
+        <a href="#" (click)="loginModalMode = 1">Register</a> - <a href="#" (click)="loginModalMode = 2">Forgot Password</a>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+
+<ng-template #registerTemplate let-c="close" let-d="dismiss">
+  <div class="modal-dialog">
+    <div class="loginmodal-container" *ngIf="loginModalMode == 1; else forgotPasswordTemplate">
+      <h1>Login to Your Account</h1><br>
+      <ngb-alert [dismissible]="true" *ngIf="registerStatus == 1" type="danger">
+        Something went wrong. Your new account could not be created. Please check your data and try again later.
+      </ngb-alert>
+      <ngb-alert [dismissible]="true" *ngIf="registerStatus == 2" type="info">
+        You've successfully created an account. Log into it now and start suporting a magic unicorn.
+      </ngb-alert>
+      <form>
+        <input type="text" name="user" placeholder="Username" [(ngModel)]="usernameFieldRegister">
+        <input type="password" name="pass" placeholder="Password" [(ngModel)]="passwordFieldRegister">
+        <input type="email" name="email" placeholder="Email address" [(ngModel)]="emailFieldRegister">
+        <input type="submit" name="login" class="login loginmodal-submit" value="Register" (click)="register()">
+      </form>
+
+      <div class="login-help">
+        <a href="#" (click)="loginModalMode = 0">Login</a> - <a href="#" (click)="loginModalMode = 2">Forgot
+        Password</a>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #forgotPasswordTemplate let-c="close" let-d="dismiss">
+  <div class="modal-dialog">
+    <div class="loginmodal-container">
+      <h2>
+        You really lost your password? Didn't you just set up your account? Come on! Please use the chat to solfe this.
+      </h2>
+      <div class="login-help">
+        <a href="#" (click)="loginModalMode = 0">Login</a> - <a href="#" (click)="loginModalMode = 1">Register</a>
+      </div>
+    </div>
+  </div>
+</ng-template>

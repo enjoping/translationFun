@@ -1,5 +1,5 @@
 import { Component, ViewChild, TemplateRef, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { NgbProgressbarConfig, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
@@ -11,6 +11,14 @@ export class AppComponent implements OnInit {
   @ViewChild('news')
   private newsTpl: TemplateRef<any>;
 
+  loginModalMode = 0;
+  usernameFieldLogin = '';
+  passwordFieldLogin = '';
+  usernameFieldRegister = '';
+  passwordFieldRegister = '';
+  emailFieldRegister = '';
+  loginStatus = 0;
+  registerStatus = 0;
   text = '';
   languages: any = [
     { name: 'Albanian', code: 'sq' },
@@ -168,6 +176,10 @@ export class AppComponent implements OnInit {
     }
   }
 
+  open(content) {
+    this.modalService.open(content);
+  }
+
   translate() {
     const url = 'https://translate.googleapis.com/translate_a/single?client=gtx';
     const source = this.sourceLanguage;
@@ -253,5 +265,30 @@ export class AppComponent implements OnInit {
     this.sourceLanguage = this.languages[Math.floor(Math.random() * this.languages.length)].code;
     this.destinationLanguage = this.languages[Math.floor(Math.random() * this.languages.length)].code;
     this.languageCount = Math.floor(Math.random() * 50);
+  }
+
+  login() {
+    this.http.post('/rest/1.0/user/login', {
+      username: this.usernameFieldLogin,
+      password: this.passwordFieldLogin,
+    }).subscribe((data: any) => {
+      console.log(data);
+      this.loginStatus = 2;
+    }, (err: HttpErrorResponse) => {
+      this.loginStatus = 1;
+    });
+  }
+
+  register() {
+    this.http.post('/rest/1.0/user/register', {
+      username: this.usernameFieldRegister,
+      password: this.passwordFieldRegister,
+      email: this.emailFieldRegister,
+    }).subscribe((data: any) => {
+      console.log(data);
+      this.registerStatus = 2;
+    }, (err: HttpErrorResponse) => {
+      this.registerStatus = 1;
+    });
   }
 }
