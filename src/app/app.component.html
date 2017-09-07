@@ -46,6 +46,8 @@
                   ngbTooltip="In a short time you will be able to see the full way of your text.">
             {{translation.chain.length - 1}} steps
           </button>
+          <br />
+          <ngb-rating (rateChange)="updateRating()" [(rate)]="translation.rating" [starTemplate]="t" max="5"></ngb-rating>
         </div>
         <div class="card-block">
           <p class="card-text">
@@ -68,10 +70,17 @@
   </div>
   <div class="modal-body">
     <div *ngFor="let change of changelog">
-      <small><i>{{change.date | date:'fullDate'}}</i></small>
-      <h3>{{change.title}}</h3>
-      <p>{{change.description}}</p>
-      <hr />
+      <div *ngIf="change.date > lastVisit">
+        <small><i>{{change.date | date:'fullDate'}}</i></small>
+        <h3>{{change.title}}</h3>
+        <p>{{change.description}}</p>
+        <hr/>
+      </div>
     </div>
   </div>
+</ng-template>
+
+<ng-template #t let-fill="fill">
+  <span *ngIf="fill === 100"><img src="/assets/banana.svg"></span>
+  <span *ngIf="fill === 0"><img src="/assets/banana-o.svg"></span>
 </ng-template>

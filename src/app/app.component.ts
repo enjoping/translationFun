@@ -120,12 +120,18 @@ export class AppComponent implements OnInit {
   destinationLanguage;
   languageCount = 0;
   history = [];
+  lastVisit = new Date(0);
   status = {
     loading: false,
     steps: 0,
     finishedSteps: 0,
   };
   changelog = [{
+    title: 'Banana!',
+    date: new Date(2017, 8, 7),
+    description: 'You love bananas as much as we do? Then lets rate your translations with bananas from 1 to 5!',
+  },
+  {
     title: 'Local History',
     date: new Date(2017, 8, 6),
     description: 'Are you also tired of losing all your cool translations when reloading the page? These times are ' +
@@ -147,9 +153,8 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     if (typeof(Storage) !== 'undefined') {
-      const lastVisit = new Date(localStorage.getItem('translator_last_visit'));
-      console.log(lastVisit);
-      if (this.changelog[0].date > lastVisit) {
+      this.lastVisit = new Date(localStorage.getItem('translator_last_visit'));
+      if (this.changelog[0].date > this.lastVisit) {
         window.setTimeout(() => {
           this.modalService.open(this.newsTpl);
         }, 1000);
@@ -195,7 +200,8 @@ export class AppComponent implements OnInit {
             destinationLanguage: destination,
             chain: chain,
             translation: data[0][0][0],
-            time: new Date()
+            time: new Date(),
+            rating: 0,
           });
           if (typeof(Storage) !== 'undefined') {
             localStorage.setItem('translator_history', JSON.stringify(this.history));
@@ -229,5 +235,11 @@ export class AppComponent implements OnInit {
     source = map.get(chain[0]);
     destination = map.get(chain[chain.length - 1]);
     return source.name + ' <i class="fa fa-arrow-circle-right" aria-hidden="true"></i> ' + destination.name;
+  }
+
+  updateRating() {
+    window.setTimeout(() => {
+      localStorage.setItem('translator_history', JSON.stringify(this.history));
+    }, 500);
   }
 }

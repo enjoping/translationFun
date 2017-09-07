@@ -10,3 +10,7 @@ button.send {
 .translation {
   margin-bottom: 20px;
 }
+
+.translation img {
+  height: 40px;
+}
