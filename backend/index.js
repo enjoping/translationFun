@@ -9,7 +9,7 @@ const passportLocalMongoose = require("passport-local-mongoose");
 const expressSession = require('express-session');
 const bodyParser = require('body-parser');
 
-const connection = mongoose.createConnection('mongodb://localhost/test');
+const connection = mongoose.createConnection('mongodb://localhost/translationFun');
 
 const UserSchema = new mongoose.Schema({
     email: { type: String, required: true },
