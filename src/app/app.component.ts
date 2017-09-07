@@ -242,4 +242,10 @@ export class AppComponent implements OnInit {
       localStorage.setItem('translator_history', JSON.stringify(this.history));
     }, 500);
   }
+
+  changeLanguages() {
+    const temp = this.sourceLanguage;
+    this.sourceLanguage = this.destinationLanguage;
+    this.destinationLanguage = temp;
+  }
 }

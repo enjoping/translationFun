@@ -1,17 +1,22 @@
 <div class="container">
   <hr />
   <div class="row">
-    <div class="col-12 col-md-8 col-xl-4">
+    <div class="col-12 col-md-12 col-xl-3">
       <label>Text</label>
       <input type="text" class="form-control" [(ngModel)]="text">
     </div>
-    <div class="col-12 col-md-4 col-xl-2">
+    <div class="col-5 col-xl-2">
       <label>Source language</label>
       <select [(ngModel)]="sourceLanguage" class="form-control">
         <option *ngFor="let language of languages" value="{{language.code}}">{{language.name}}</option>
       </select>
     </div>
-    <div class="col-12 col-md-4 col-xl-2">
+    <div class="col-2 col-xl-1">
+      <button type="button" class="btn btn-primary send" (click)="changeLanguages()" >
+        <i class="fa fa-exchange" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="col-5 col-xl-2">
       <label>Destination language</label>
       <select [(ngModel)]="destinationLanguage" class="form-control">
         <option *ngFor="let language of languages" value="{{language.code}}">{{language.name}}</option>
