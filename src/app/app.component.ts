@@ -248,4 +248,10 @@ export class AppComponent implements OnInit {
     this.sourceLanguage = this.destinationLanguage;
     this.destinationLanguage = temp;
   }
+
+  randomize() {
+    this.sourceLanguage = this.languages[Math.floor(Math.random() * this.languages.length)].code;
+    this.destinationLanguage = this.languages[Math.floor(Math.random() * this.languages.length)].code;
+    this.languageCount = Math.floor(Math.random() * 50);
+  }
 }

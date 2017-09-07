@@ -26,7 +26,12 @@
       <label>Unnecessary steps</label>
       <input type="number" class="form-control" [(ngModel)]="languageCount">
     </div>
-    <div class="col-12 col-md-4 col-xl-2">
+    <div class="col-6 col-md-2 col-xl-1">
+      <button type="button" class="btn btn-primary send" (click)="randomize()">
+        <i class="fa fa-random" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="col-6 col-md-2 col-xl-1">
       <button type="button" class="btn btn-primary send" (click)="translate()" [disabled]="status.loading">
         <i *ngIf="status.loading" class="fa fa-spinner fa-pulse fa-fw" aria-hidden="true"></i>
         Translate
