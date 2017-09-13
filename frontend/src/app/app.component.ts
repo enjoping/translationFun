@@ -20,6 +20,7 @@ export class AppComponent implements OnInit {
   loginStatus = 0;
   registerStatus = 0;
   text = '';
+  translationWay = 'random';
   languages: any = [
     { name: 'Albanian', code: 'sq' },
     { name: 'Amharic', code: 'am' },
@@ -185,47 +186,104 @@ export class AppComponent implements OnInit {
     const source = this.sourceLanguage;
     const destination = this.destinationLanguage;
     const translationSteps = this.languageCount;
-    const chain = [source];
     const languages = this.languages;
     const http = this.http;
     const original = this.text;
+    const style = this.translationWay;
 
     this.status.loading = true;
     this.status.steps = translationSteps + 1;
     this.status.finishedSteps = 0;
 
-    function loadTranslationStep(step, text) {
+    let fullText = original;
+    let match = fullText.match(/([.?\n])\s*/);
+    const textParts = [];
+    const textSplit = [];
+    while (match) {
+      const part = fullText.substr(0, match.index).trim();
+      if (part !== '') {
+        textParts.push(part);
+        textSplit.push(match[0]);
+      }
+      fullText = fullText.substr(match.index + match[0].length);
+      match = fullText.match(/([.?\n])\s*/);
+    }
+    const part = fullText.trim();
+    if (part !== '') {
+      textParts.push(part);
+      textSplit.push('');
+    }
+    this.status.steps *= textParts.length;
+    const translation = new Array(textParts.length).fill('');
+    let finished = 0;
+    const chain = Array.from({length: textParts.length}, e => Array(1).fill(source));
+
+    function loadTranslationStep(step, text, index) {
+      let from = '';
+      if (style === 'same') {
+        from = chain[0][chain[0].length - 1];
+      } else {
+        from = chain[index][chain[index].length - 1];
+      }
+
       let to;
       if (step === translationSteps) {
         to = destination;
+        if (style === 'same') {
+          chain[0].push(to);
+        } else {
+          chain[index].push(to);
+        }
       } else {
-        to = languages[Math.floor(Math.random() * languages.length)].code;
+        if (style === 'same' && chain[0][step]) {
+          to = chain[0][step];
+        } else {
+          to = languages[Math.floor(Math.random() * languages.length)].code;
+          if (style === 'same') {
+            chain[0].push(to);
+          } else {
+            chain[index].push(to);
+          }
+        }
       }
-      const from = chain[chain.length - 1];
-      chain.push(to);
 
       http.get(url + '&sl=' + from + '&tl=' + to + '&dt=t&q=' + text).subscribe((data: any) => {
         if (step === translationSteps) {
-          this.history.unshift({
-            text: original,
-            sourceLanguage: source,
-            destinationLanguage: destination,
-            chain: chain,
-            translation: data[0][0][0],
-            time: new Date(),
-            rating: 0,
-          });
-          if (typeof(Storage) !== 'undefined') {
-            localStorage.setItem('translator_history', JSON.stringify(this.history));
+          translation[index] = data[0][0][0] + (textSplit[index] ? textSplit[index] : '');
+          if (++finished == translation.length) {
+            let shortText = translation.join('');
+            if (shortText.length > 100) {
+              //shortText = shortText.substr(0, 96) + ' ...';
+            }
+            let shortOriginal = original;
+            if (shortOriginal.length > 100) {
+              //shortOriginal = shortOriginal.substr(0, 96) + ' ...';
+            }
+            this.history.unshift({
+              text: shortOriginal,
+              fullText: original,
+              sourceLanguage: source,
+              destinationLanguage: destination,
+              chain: chain,
+              translation: shortText,
+              fullTranslation: translation,
+              time: new Date(),
+              rating: 0,
+            });
+            if (typeof(Storage) !== 'undefined') {
+              localStorage.setItem('translator_history', JSON.stringify(this.history));
+            }
+            this.status.loading = false;
           }
-          this.status.loading = false;
         } else {
           this.status.finishedSteps++;
-          loadTranslationStep.call(this, step + 1, data[0][0][0]);
+          loadTranslationStep.call(this, step + 1, data[0][0][0], index);
         }
       });
     }
-    loadTranslationStep.call(this, 0, original);
+    for (let i=0; i < textParts.length; i++) {
+      loadTranslationStep.call(this, 0, textParts[i], i);
+    }
   }
 
   printTranslationChain(chainRef) {
@@ -272,7 +330,6 @@ export class AppComponent implements OnInit {
       username: this.usernameFieldLogin,
       password: this.passwordFieldLogin,
     }).subscribe((data: any) => {
-      console.log(data);
       this.loginStatus = 2;
     }, (err: HttpErrorResponse) => {
       this.loginStatus = 1;
@@ -291,4 +348,9 @@ export class AppComponent implements OnInit {
       this.registerStatus = 1;
     });
   }
+
+  onTranslationWayChange(way) {
+    //this.translationWay = way;
+  }
+
 }

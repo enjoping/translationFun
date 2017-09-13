@@ -37,7 +37,12 @@
   <div class="row">
     <div class="col-12 col-md-12 col-xl-3">
       <label>Text</label>
-      <input type="text" class="form-control" [(ngModel)]="text">
+      <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+        <input type="text" class="form-control" [(ngModel)]="text">
+        <div class="input-group-addon primary" (click)="open(extendedInput)">
+          <i class="fa fa-external-link" aria-hidden="true"></i>
+        </div>
+      </div>
     </div>
     <div class="col-5 col-xl-2">
       <label>Source language</label>
@@ -84,11 +89,11 @@
     <div class="col-12 col-md-4 translation" *ngFor="let translation of history">
       <div class="card">
         <div class="card-header">
-          <h4 [innerHTML]="printTranslationSummary(translation.chain)"></h4>
+          <h4 [innerHTML]="printTranslationSummary(translation.chain[0])"></h4>
           <button class="btn btn-sm btn-secondary" data-toggle="tooltip" data-html="true" data-placement="bottom"
-                  title="{{printTranslationChain(translation.chain)}}" placement="top"
+                  title="{{printTranslationChain(translation.chain[0])}}" placement="top"
                   ngbTooltip="In a short time you will be able to see the full way of your text.">
-            {{translation.chain.length - 1}} steps
+            {{translation.chain[0].length - 1}} steps
           </button>
           <br />
           <ngb-rating (rateChange)="updateRating()" [(rate)]="translation.rating" [starTemplate]="t" max="5"></ngb-rating>
@@ -188,5 +193,31 @@
         <a href="#" (click)="loginModalMode = 0">Login</a> - <a href="#" (click)="loginModalMode = 1">Register</a>
       </div>
     </div>
+  </div>
+</ng-template>
+
+<ng-template #extendedInput let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <h4 class="modal-title">
+      Need more space?
+    </h4>
+  </div>
+  <div class="modal-body">
+    <label>Text to be translated</label>
+    <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+      <textarea class="form-control" id="exampleTextarea" rows="10" [(ngModel)]="text"></textarea>
+    </div>
+    <br />
+    <p>Texts with multiple sentences or lines will be split. You can choose if every part of your text should go
+      the same way or if a random way for all parts should be found.</p>
+    <div class="btn-group" data-toggle="buttons">
+      <label class="btn btn-primary" (click)="onTranslationWayChange('same')">
+        <input type="radio" name="translationWay" id="same" autocomplete="off" disabled> Same languages
+      </label>
+      <label class="btn btn-primary active" (click)="onTranslationWayChange('random')">
+        <input type="radio" name="translationWay" id="random" autocomplete="off" checked> Random
+      </label>
+    </div>
+    <br />
   </div>
 </ng-template>

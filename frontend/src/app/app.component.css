@@ -117,3 +117,9 @@ button.send {
 .translation img {
   height: 40px;
 }
+
+.input-group-addon.primary {
+  color: #fff;
+  background-color: #007bff;
+  border-color: #007bff;
+}
