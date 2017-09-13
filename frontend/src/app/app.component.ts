@@ -172,7 +172,16 @@ export class AppComponent implements OnInit {
 
       const history = JSON.parse(localStorage.getItem('translator_history'));
       if (history) {
-        this.history = history;
+        let finished = 0;
+        for (let i = 0; i < history.length; i++) {
+          if (typeof history[i].chain[0] === 'string') {
+            history[i].chain[0] = ['de'];
+          }
+          if (++finished === history.length - 1) {
+            localStorage.setItem('translator_history', JSON.stringify(history));
+            this.history = history;
+          }
+        }
       }
     }
   }
