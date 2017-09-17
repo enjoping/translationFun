@@ -1,6 +1,7 @@
 import { Component, ViewChild, TemplateRef, OnInit } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { NgbProgressbarConfig, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-root',
@@ -172,13 +173,42 @@ export class AppComponent implements OnInit {
   ];
   translationToShare: any = {};
 
-  constructor(private http: HttpClient, private modalService: NgbModal, config: NgbProgressbarConfig) {
+  adBanners = [
+    '<iframe src="https://rcm-eu.amazon-adsystem.com/e/cm?o=3&p=12&l=ur1&category=electronics&banner=1WY69X54P3YBP8EGFYR2&f=ifr&linkID=42f3c77f25bb6575a7490932d399dafa&t=laecherbartra-21&tracking_id=laecherbartra-21" width="300" height="250" scrolling="no" border="0" marginwidth="0" style="border:none;" frameborder="0"></iframe>',
+    '<iframe src="https://rcm-eu.amazon-adsystem.com/e/cm?o=3&p=22&l=ez&f=ifr&linkID=598cd23dba5daf118d99b23a811b005c&t=laecherbartra-21&tracking_id=laecherbartra-21" width="250" height="250" scrolling="no" border="0" marginwidth="0" style="border:none;" frameborder="0"></iframe>',
+    '<iframe src="https://rcm-eu.amazon-adsystem.com/e/cm?o=3&p=22&l=ur1&category=generic&banner=1P75NP83WCBX5Y8N4A82&f=ifr&linkID=518f9354e2d1cf6fc14502fe477462ca&t=laecherbartra-21&tracking_id=laecherbartra-21" width="250" height="250" scrolling="no" border="0" marginwidth="0" style="border:none;" frameborder="0"></iframe>',
+    '<iframe src="https://rcm-eu.amazon-adsystem.com/e/cm?o=3&p=12&l=ur1&category=channels&banner=0ZBHZ163TXXTM669VQR2&f=ifr&linkID=b76ebf37a8daec4d43be43771d13918d&t=laecherbartra-21&tracking_id=laecherbartra-21" width="300" height="250" scrolling="no" border="0" marginwidth="0" style="border:none;" frameborder="0"></iframe>',
+    '<iframe src="https://rcm-eu.amazon-adsystem.com/e/cm?o=3&p=22&l=ur1&category=channels&banner=1XPQWPXDZG9N6WGNKD82&f=ifr&linkID=c81dd7365052b4c106dbc1206955d239&t=laecherbartra-21&tracking_id=laecherbartra-21" width="250" height="250" scrolling="no" border="0" marginwidth="0" style="border:none;" frameborder="0"></iframe>',
+    '<iframe src="https://rcm-eu.amazon-adsystem.com/e/cm?o=3&p=12&l=ur1&category=computer&banner=01HSHP56QWTDVE873082&f=ifr&linkID=69634f479170b2d2ac88fd3cd6fbca02&t=laecherbartra-21&tracking_id=laecherbartra-21" width="300" height="250" scrolling="no" border="0" marginwidth="0" style="border:none;" frameborder="0"></iframe>',
+    '<iframe src="https://rcm-eu.amazon-adsystem.com/e/cm?o=3&p=22&l=ur1&category=fire_tablets&banner=15PAFPZCMZPDXBAG5MG2&f=ifr&linkID=30c0391e58d171f21c0fdd9a2bbc50a9&t=laecherbartra-21&tracking_id=laecherbartra-21" width="250" height="250" scrolling="no" border="0" marginwidth="0" style="border:none;" frameborder="0"></iframe>',
+    '<iframe src="https://rcm-eu.amazon-adsystem.com/e/cm?o=3&p=22&l=ur1&category=fire_tv&banner=1S386RSFVXVMGNGN4182&f=ifr&linkID=bebc1fb46ce73f339094a2014613fb0c&t=laecherbartra-21&tracking_id=laecherbartra-21" width="250" height="250" scrolling="no" border="0" marginwidth="0" style="border:none;" frameborder="0"></iframe>',
+    '<iframe src="https://rcm-eu.amazon-adsystem.com/e/cm?o=3&p=22&l=ur1&category=firetv_stick&banner=11E209AEC664NMK9GA02&f=ifr&linkID=470ce1dd22b89fac9057d63aa0e7241e&t=laecherbartra-21&tracking_id=laecherbartra-21" width="250" height="250" scrolling="no" border="0" marginwidth="0" style="border:none;" frameborder="0"></iframe>',
+    '<iframe src="https://rcm-eu.amazon-adsystem.com/e/cm?o=3&p=22&l=ur1&category=launchpad&banner=15TT5ZRE5JQ139892202&f=ifr&linkID=8c4a2cb133d04ad4d8848447a6e85323&t=laecherbartra-21&tracking_id=laecherbartra-21" width="250" height="250" scrolling="no" border="0" marginwidth="0" style="border:none;" frameborder="0"></iframe>',
+    '<iframe src="https://rcm-eu.amazon-adsystem.com/e/cm?o=3&p=22&l=ur1&category=musicunlimited&banner=1YQ0RT3JXV556SF1DMG2&f=ifr&linkID=9a6ee09df67872542eaac685af41f2cb&t=laecherbartra-21&tracking_id=laecherbartra-21" width="250" height="250" scrolling="no" border="0" marginwidth="0" style="border:none;" frameborder="0"></iframe>',
+    '<iframe src="https://rcm-eu.amazon-adsystem.com/e/cm?o=3&p=22&l=ur1&category=musicunlimited&banner=13MCC0FVMG5ZDF0T69R2&f=ifr&linkID=4aad78c68887877cb243e5fc53096efe&t=laecherbartra-21&tracking_id=laecherbartra-21" width="250" height="250" scrolling="no" border="0" marginwidth="0" style="border:none;" frameborder="0"></iframe>',
+    '<iframe src="https://rcm-eu.amazon-adsystem.com/e/cm?o=3&p=22&l=ur1&category=musicunlimited&banner=0P1RD8CBZVJ1ZA40D1G2&f=ifr&linkID=d39ad538c9db584d19dbded9cee9aad4&t=laecherbartra-21&tracking_id=laecherbartra-21" width="250" height="250" scrolling="no" border="0" marginwidth="0" style="border:none;" frameborder="0"></iframe>',
+    '<iframe src="https://rcm-eu.amazon-adsystem.com/e/cm?o=3&p=22&l=ur1&category=musicunlimited&banner=1QMPC0WNT7HWYS34TN02&f=ifr&linkID=aea81b6b7f0090ce692f14180fcae05b&t=laecherbartra-21&tracking_id=laecherbartra-21" width="250" height="250" scrolling="no" border="0" marginwidth="0" style="border:none;" frameborder="0"></iframe>',
+    '<iframe src="https://rcm-eu.amazon-adsystem.com/e/cm?o=3&p=22&l=ur1&category=primemusic&banner=0YXY1KV7Y9SJXKE7DRG2&f=ifr&linkID=ab92b009e05754fcba2d665ea0d0acea&t=laecherbartra-21&tracking_id=laecherbartra-21" width="250" height="250" scrolling="no" border="0" marginwidth="0" style="border:none;" frameborder="0"></iframe>',
+    '<iframe src="https://rcm-eu.amazon-adsystem.com/e/cm?o=3&p=22&l=ur1&category=prime_student&banner=0SXVC3WXR1CJG3YZCBR2&f=ifr&linkID=099548ca192d9d0ae2f74b3bcc051dd6&t=laecherbartra-21&tracking_id=laecherbartra-21" width="250" height="250" scrolling="no" border="0" marginwidth="0" style="border:none;" frameborder="0"></iframe>',
+  ];
+  ownAdBanner;
+  dashboardAdBanner;
+
+  constructor(private http: HttpClient, private modalService: NgbModal, config: NgbProgressbarConfig, private sanitizer: DomSanitizer) {
     config.striped = true;
     config.animated = true;
     config.type = 'success';
   }
 
   ngOnInit() {
+    const random = Math.floor(Math.random() * this.adBanners.length);
+    this.ownAdBanner = this.sanitizer.bypassSecurityTrustHtml(this.adBanners[random]);
+    if (random > 0) {
+      this.dashboardAdBanner = this.sanitizer.bypassSecurityTrustHtml(this.adBanners[random - 1]);
+    } else {
+      this.dashboardAdBanner = this.sanitizer.bypassSecurityTrustHtml(this.adBanners[random + 1]);
+    }
+
     let sharedTranslation = false;
     if (window.location.search) {
       sharedTranslation = true;
@@ -233,7 +263,7 @@ export class AppComponent implements OnInit {
     const url = 'https://translation.googleapis.com/language/translate/v2?key=AIzaSyBAEpue6EXR9ktgzypHLNF2oTxopzb3ueU&format=text';
     const source = this.sourceLanguage;
     const destination = this.destinationLanguage ? this.destinationLanguage : this.sourceLanguage;
-    const translationSteps = this.languageCount;
+    const translationSteps = this.languageCount > 5 ? 5 : this.languageCount;
     const languages = this.languages;
     const http = this.http;
     const original = this.text;

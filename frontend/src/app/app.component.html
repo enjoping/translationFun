@@ -9,20 +9,9 @@
       <li class="nav-item active">
         <a class="nav-link" href="#" (click)="openChangelog()">Changelog <span class="sr-only">(current)</span></a>
       </li>
-      <!--<li class="nav-item">
-        <a class="nav-link" href="#">Link</a>
+      <li class="nav-item active">
+        <a class="nav-link" href="#" (click)="open(impressum)">Impressum</a>
       </li>
-      <li class="nav-item">
-        <a class="nav-link disabled" href="#">Disabled</a>
-      </li>
-      <li class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle" href="http://example.com" id="dropdown01" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Dropdown</a>
-        <div class="dropdown-menu" aria-labelledby="dropdown01">
-          <a class="dropdown-item" href="#">Action</a>
-          <a class="dropdown-item" href="#">Another action</a>
-          <a class="dropdown-item" href="#">Something else here</a>
-        </div>
-      </li>-->
     </ul>
     <form class="form-inline my-2 my-lg-0">
       <button class="btn btn-outline-success my-2 my-sm-0" (click)="open(loginModal)" *ngIf="loginStatus != 2; else alreadyLoggedIn">Login</button>
@@ -123,6 +112,13 @@
   <div class="row">
     <div class="tab-content container">
       <div class="tab-pane active row" id="home" role="tabpanel">
+        <div class="col-12 col-md-4 translation">
+          <div class="card">
+            <div class="card-block">
+              <div [innerHTML]="ownAdBanner"></div>
+            </div>
+          </div>
+        </div>
         <div class="col-12 col-md-4 translation" *ngFor="let translation of history">
           <div class="card">
             <div class="card-header my-translation">
@@ -148,6 +144,13 @@
         </div>
       </div>
       <div class="tab-pane row" id="dashboard" role="tabpanel">
+        <div class="col-12 col-md-4 translation">
+          <div class="card">
+            <div class="card-block">
+              <div [innerHTML]="dashboardAdBanner"></div>
+            </div>
+          </div>
+        </div>
         <div class="col-12 col-md-4 translation" *ngFor="let translation of dashboard">
           <div class="card">
             <div class="card-header" [ngClass]="{'my-translation': translation.uid == userId}">
@@ -207,6 +210,8 @@
     <hr />
     <h5>Translation</h5>
     <p>{{sharedTranslation.translation}}</p>
+    <br />
+    <iframe src="https://rcm-eu.amazon-adsystem.com/e/cm?o=3&p=288&l=ur1&category=channels&banner=1PW6PWE67VPZV3ZW1RR2&f=ifr&linkID=fa1dfa274197924bf1a738d903491640&t=laecherbartra-21&tracking_id=laecherbartra-21" width="320" height="50" scrolling="no" border="0" marginwidth="0" style="border:none;" frameborder="0"></iframe>
   </div>
 </ng-template>
 
@@ -344,5 +349,23 @@
         Copy link to clipboard
       </button>
     </div>
+  </div>
+</ng-template>
+
+<ng-template #impressum let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <h4 class="modal-title">
+      Impressum
+    </h4>
+  </div>
+  <div class="modal-body">
+    <p>
+      <b>Impressum nach §5 Telemediengesetz</b><br />
+      Anbieter: Joe Pietler, Liebfrauenstraße 5, 64289 Darmstadt<br /><br />
+      Kontakt:<br />
+      Telefon: +4917684347299<br />
+      Email: enjoping [at] gmail.com<br />
+      Website: lächerbar.de
+    </p>
   </div>
 </ng-template>
