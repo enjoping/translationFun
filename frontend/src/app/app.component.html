@@ -127,7 +127,7 @@
           <div class="card">
             <div class="card-header my-translation">
               <h4 [innerHTML]="printTranslationSummary(translation.chain[0])"></h4>
-              <button *ngIf="loginStatus == 2" class="btn btn-outline-secondary btn-sm" (click)="shareTranslation(translation, share)">
+              <button class="btn btn-outline-secondary btn-sm" (click)="shareTranslation(translation, share)">
                 <i class="fa fa-external-link" aria-hidden="true"></i>
               </button>
               <button class="btn btn-sm btn-secondary" data-toggle="tooltip" data-html="true" data-placement="bottom"
@@ -190,6 +190,23 @@
         <hr/>
       </div>
     </div>
+  </div>
+</ng-template>
+
+<ng-template #shared let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <h3 class="modal-title">
+      Lächerbar translation
+    </h3>
+    <small>from {{sharedTranslation.sourceLanguage}} to {{sharedTranslation.destinationLanguage}}</small>
+    <small *ngIf="sharedTranslation.chain">{{sharedTranslation.chain[0].length - 1}} steps</small>
+  </div>
+  <div class="modal-body">
+    <h5>Original</h5>
+    <p>{{sharedTranslation.text}}</p>
+    <hr />
+    <h5>Translation</h5>
+    <p>{{sharedTranslation.translation}}</p>
   </div>
 </ng-template>
 
@@ -300,13 +317,32 @@
       You've successfully shared your translation with the world.
     </ngb-alert>
 
-    <button data-toggle="tooltip" data-html="true" data-placement="bottom" placement="bottom"
-            ngbTooltip="This will allow all users to see your translation and logged in users to rate it."
-            class="btn btn-outline-primary" (click)="shareToDashboard()" *ngIf="!translationToShare.published">
-      Share with the public dashboard
-    </button>
-    <p *ngIf="translationToShare.published">
-      You've already shared your translation with the world. Further options to share your work will follow in the future
-    </p>
+    <div *ngIf="loginStatus == 2">
+      <button data-toggle="tooltip" data-html="true" data-placement="bottom" placement="bottom"
+              ngbTooltip="This will allow all users to see your translation and logged in users to rate it."
+              class="btn btn-outline-primary" (click)="shareToDashboard()" *ngIf="!translationToShare.published">
+        Share with the public dashboard
+      </button>
+      <p *ngIf="translationToShare.published">
+        You've already shared your translation with the world. Further options to share your work will follow in the
+        future
+      </p>
+      <hr />
+    </div>
+    <div *ngIf="!translationToShare.id">
+      <ngb-alert [dismissible]="true" type="warning">
+        This translation has not been uploaded to our server by now. To be able to share it you need to upload it first.
+      </ngb-alert>
+      <button data-toggle="tooltip" class="btn btn-outline-primary" (click)="uploadTranslation()" >
+        Upload this translation
+      </button>
+    </div>
+    <div *ngIf="translationToShare.id">
+      <button data-toggle="tooltip" data-html="true" data-placement="bottom" placement="bottom"
+              ngbTooltip="This will allow all users to see your translation and logged in users to rate it."
+              class="btn btn-outline-primary" (click)="copyToClipboard()" >
+        Copy link to clipboard
+      </button>
+    </div>
   </div>
 </ng-template>

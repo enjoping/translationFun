@@ -9,6 +9,8 @@ const mongoose = require("mongoose");
 const passportLocalMongoose = require("passport-local-mongoose");
 const expressSession = require('express-session');
 const bodyParser = require('body-parser');
+const jade = require('jade');
+const template = jade.compileFile(__dirname + '/share.jade');
 
 const secret = 'secret';
 const authenticate = expressJwt({secret : secret});
@@ -149,6 +151,47 @@ app.patch('/rest/1.0/user/:id/translation/:tid', authenticate, function (req, re
         });
 });
 
+app.post('/rest/1.0/nouser/translation', function (req, res) {
+
+    userModel.findOne({ username: 'nouser' })
+        .then(user => {
+            if (!user) {
+                const tmpUser = new userModel({
+                    email: 'nomail',
+                    username: 'nouser'
+                });
+                userModel.register(tmpUser, 'nouser', (err, account) => {
+                    if (err) {
+                        res.status(400);
+                        res.json({ error: err.message });
+                        return;
+                    }
+                    user = account;
+                });
+            }
+            const translation = {
+                id: uuidv1(),
+                text: req.body.text,
+                translation: req.body.translation,
+                sourceLanguage: req.body.sourceLanguage,
+                destinationLanguage: req.body.destinationLanguage,
+                chain: req.body.chain,
+                published: req.body.published ? req.body.published : false,
+                ratings: {},
+                rating: req.body.rating,
+            };
+            translation.ratings[req.params.id] = req.body.rating;
+
+            if (!user.translations) {
+                user.translations = [];
+            }
+            user.translations.push(translation);
+            user.save();
+            res.status(200);
+            res.json(translation);
+        });
+});
+
 app.get('/rest/1.0/dashboard', function (req, res) {
     userModel.find().then(users => {
         const translations = [];
@@ -164,6 +207,36 @@ app.get('/rest/1.0/dashboard', function (req, res) {
     });
 });
 
+app.get('/share/:tid', function (req, res) {
+    userModel.find().then(users => {
+        const translations = [];
+        users.forEach(user => {
+            user.translations.forEach(translation => {
+                if (translation.id == req.params.tid) {
+                    res.status(200);
+                    const title = 'Lächerbar translation from "' + translation.sourceLanguage + '" to "' + translation.destinationLanguage + '"';
+                    const description = 'Original: ' + translation.text + "\n" + 'Translation: ' + translation.translation;
+                    const html = template({title:title, description: description, id: translation.id});
+                    res.send(html);
+                }
+            });
+        });
+    });
+});
+
+app.get('/rest/1.0/translation/:tid', function (req, res) {
+    userModel.find().then(users => {
+        const translations = [];
+        users.forEach(user => {
+            user.translations.forEach(translation => {
+                if (translation.id == req.params.tid) {
+                    res.status(200);
+                    res.json(translation);
+                }
+            });
+        });
+    });
+});
 
 app.listen(8010, () => {
     console.log('Lächerbar translator backend listening on port 8010!');

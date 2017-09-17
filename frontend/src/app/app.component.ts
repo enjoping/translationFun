@@ -10,7 +10,10 @@ import { NgbProgressbarConfig, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 export class AppComponent implements OnInit {
   @ViewChild('news')
   private newsTpl: TemplateRef<any>;
+  @ViewChild('shared')
+  private sharedTpl: TemplateRef<any>;
 
+  sharedTranslation: any = {};
   extended = false;
   loginModalMode = 0;
   usernameFieldLogin = '';
@@ -176,9 +179,20 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
+    let sharedTranslation = false;
+    if (window.location.search) {
+      sharedTranslation = true;
+      const id = window.location.search.substr(13);
+      window.setTimeout(() => {
+        this.http.get('/rest/1.0/translation/' + id).subscribe((data: any) => {
+          this.sharedTranslation = data;
+        });
+        this.modalService.open(this.sharedTpl);
+      }, 500);
+    }
     if (typeof(Storage) !== 'undefined') {
       this.lastVisit = new Date(localStorage.getItem('translator_last_visit'));
-      if (this.changelog[0].date > this.lastVisit) {
+      if (!sharedTranslation && this.changelog[0].date > this.lastVisit) {
         window.setTimeout(() => {
           this.modalService.open(this.newsTpl);
         }, 1000);
@@ -437,6 +451,27 @@ export class AppComponent implements OnInit {
         this.shareStatus = 1;
       });
     }
+  }
+
+  copyToClipboard() {
+    const translation = this.translationToShare;
+    var input = document.createElement('input');
+    input.setAttribute('value', 'http://translator.xn--lcherbar-0za.de/share/' + translation.id);
+    document.body.appendChild(input);
+    input.select();
+    document.execCommand('copy');
+    document.body.removeChild(input)
+  }
+
+  uploadTranslation() {
+    const translation = this.translationToShare;
+
+    this.http.post('/rest/1.0/nouser/translation', translation).subscribe((data: any) => {
+      this.shareStatus = 2;
+      translation.id = data.id;
+      this.updateLocalStorage();
+    }, (err: HttpErrorResponse) => {
+    });
   }
 
   updateLocalStorage() {
