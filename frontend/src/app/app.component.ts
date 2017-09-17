@@ -1,5 +1,5 @@
 import { Component, ViewChild, TemplateRef, OnInit } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { NgbProgressbarConfig, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
@@ -11,6 +11,7 @@ export class AppComponent implements OnInit {
   @ViewChild('news')
   private newsTpl: TemplateRef<any>;
 
+  extended = false;
   loginModalMode = 0;
   usernameFieldLogin = '';
   passwordFieldLogin = '';
@@ -18,6 +19,9 @@ export class AppComponent implements OnInit {
   passwordFieldRegister = '';
   emailFieldRegister = '';
   loginStatus = 0;
+  userId: number;
+  backendToken: HttpHeaders;
+  shareStatus = 0;
   registerStatus = 0;
   text = '';
   translationWay = 'random';
@@ -129,30 +133,41 @@ export class AppComponent implements OnInit {
   destinationLanguage;
   languageCount = 0;
   history = [];
+  dashboard = [];
   lastVisit = new Date(0);
   status = {
     loading: false,
     steps: 0,
     finishedSteps: 0,
   };
-  changelog = [{
-    title: 'Banana!',
-    date: new Date(2017, 8, 7),
-    description: 'You love bananas as much as we do? Then lets rate your translations with bananas from 1 to 5!',
-  },
-  {
-    title: 'Local History',
-    date: new Date(2017, 8, 6),
-    description: 'Are you also tired of losing all your cool translations when reloading the page? These times are ' +
-    'over now. A history is now saved to your browser and loaded every time you visit us again.',
-  },
-  {
-    title: 'Loading indicator',
-    date: new Date(2017, 8, 5),
-    description: 'You never knew how long to wait until your translation finally finished. It looked like the page is ' +
-    'just ignoring you instead of translating your stuff. Well, this has changed now! A fancy loading indicator tells ' +
-    'you exactly how long you still have to wait now.',
-  }];
+  changelog = [
+    {
+      title: 'Spread the love!',
+      date: new Date(2017, 8, 17),
+      description: 'You want to share all your translations with the world? Then have fun with our new feature. You can ' +
+      'now share all translations with our open dashboard. All you need to do is create an account and click on the ' +
+      'little share button on every translation.',
+    },
+    {
+      title: 'Banana!',
+      date: new Date(2017, 8, 7),
+      description: 'You love bananas as much as we do? Then lets rate your translations with bananas from 1 to 5!',
+    },
+    {
+      title: 'Local History',
+      date: new Date(2017, 8, 6),
+      description: 'Are you also tired of losing all your cool translations when reloading the page? These times are ' +
+      'over now. A history is now saved to your browser and loaded every time you visit us again.',
+    },
+    {
+      title: 'Loading indicator',
+      date: new Date(2017, 8, 5),
+      description: 'You never knew how long to wait until your translation finally finished. It looked like the page is ' +
+      'just ignoring you instead of translating your stuff. Well, this has changed now! A fancy loading indicator tells ' +
+      'you exactly how long you still have to wait now.',
+    }
+  ];
+  translationToShare: any = {};
 
   constructor(private http: HttpClient, private modalService: NgbModal, config: NgbProgressbarConfig) {
     config.striped = true;
@@ -177,13 +192,23 @@ export class AppComponent implements OnInit {
           if (typeof history[i].chain[0] === 'string') {
             history[i].chain[0] = ['de'];
           }
-          if (++finished === history.length - 1) {
+          if (++finished >= history.length - 1) {
             localStorage.setItem('translator_history', JSON.stringify(history));
             this.history = history;
           }
         }
       }
+
+      const userData = JSON.parse(localStorage.getItem('translator_user'));
+      if (userData) {
+        this.loginStatus = 2;
+        this.userId = userData.uid;
+        this.backendToken = new HttpHeaders().set('Authorization', 'Bearer ' + userData.token);
+      }
     }
+    this.http.get('/rest/1.0/dashboard').subscribe((data: any) => {
+      this.dashboard = data;
+    });
   }
 
   open(content) {
@@ -193,7 +218,7 @@ export class AppComponent implements OnInit {
   translate() {
     const url = 'https://translate.googleapis.com/translate_a/single?client=gtx';
     const source = this.sourceLanguage;
-    const destination = this.destinationLanguage;
+    const destination = this.destinationLanguage ? this.destinationLanguage : this.sourceLanguage;
     const translationSteps = this.languageCount;
     const languages = this.languages;
     const http = this.http;
@@ -268,7 +293,7 @@ export class AppComponent implements OnInit {
             if (shortOriginal.length > 100) {
               //shortOriginal = shortOriginal.substr(0, 96) + ' ...';
             }
-            this.history.unshift({
+            const finalTranslation = {
               text: shortOriginal,
               fullText: original,
               sourceLanguage: source,
@@ -278,9 +303,21 @@ export class AppComponent implements OnInit {
               fullTranslation: translation,
               time: new Date(),
               rating: 0,
-            });
-            if (typeof(Storage) !== 'undefined') {
-              localStorage.setItem('translator_history', JSON.stringify(this.history));
+              published: false,
+            };
+            if (this.userId) {
+              this.http.post('/rest/1.0/user/' + this.userId + '/translation', finalTranslation, {
+                headers: this.backendToken,
+              }).subscribe((data: any) => {
+                this.history.unshift(data);
+                this.updateLocalStorage();
+              }, (err: HttpErrorResponse) => {
+                this.history.unshift(finalTranslation);
+                this.updateLocalStorage();
+              });
+            } else {
+              this.history.unshift(finalTranslation);
+              this.updateLocalStorage();
             }
             this.status.loading = false;
           }
@@ -339,7 +376,10 @@ export class AppComponent implements OnInit {
       username: this.usernameFieldLogin,
       password: this.passwordFieldLogin,
     }).subscribe((data: any) => {
+      this.userId = data.uid;
+      this.backendToken = new HttpHeaders().set('Authorization', 'Bearer ' + data.token);
       this.loginStatus = 2;
+      localStorage.setItem('translator_user', JSON.stringify(data));
     }, (err: HttpErrorResponse) => {
       this.loginStatus = 1;
     });
@@ -362,4 +402,51 @@ export class AppComponent implements OnInit {
     //this.translationWay = way;
   }
 
+  toggleExtended() {
+    this.extended = !this.extended;
+  }
+
+  shareTranslation(translation, popup) {
+    this.shareStatus = 0;
+    this.translationToShare = translation;
+    this.open(popup);
+  }
+
+  shareToDashboard() {
+    const translation = this.translationToShare;
+
+    if (!translation.id) {
+      translation.published = true;
+      this.http.post('/rest/1.0/user/'+this.userId+'/translation', translation, {
+        headers: this.backendToken,
+      }).subscribe((data: any) => {
+        this.shareStatus = 2;
+        translation.id = data.id;
+        this.updateLocalStorage();
+      }, (err: HttpErrorResponse) => {
+        this.shareStatus = 1;
+      });
+    } else {
+      this.http.patch('/rest/1.0/user/'+this.userId+'/translation/'+translation.id, { published: true }, {
+        headers: this.backendToken,
+      }).subscribe((data: any) => {
+        this.shareStatus = 2;
+        translation.published = true;
+        this.updateLocalStorage();
+      }, (err: HttpErrorResponse) => {
+        this.shareStatus = 1;
+      });
+    }
+  }
+
+  updateLocalStorage() {
+    if (typeof(Storage) !== 'undefined') {
+      localStorage.setItem('translator_history', JSON.stringify(this.history));
+    }
+  }
+
+  openChangelog() {
+    this.lastVisit = new Date(0);
+    this.modalService.open(this.newsTpl);
+  }
 }

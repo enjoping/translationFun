@@ -123,3 +123,11 @@ button.send {
   background-color: #007bff;
   border-color: #007bff;
 }
+
+.tab-content > .active {
+  display: flex;
+}
+
+.my-translation {
+  background-color: rgba(0, 255, 22, 0.05);
+}

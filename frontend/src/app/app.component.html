@@ -6,10 +6,10 @@
 
   <div class="collapse navbar-collapse" id="navbarsExampleDefault">
     <ul class="navbar-nav mr-auto">
-      <!--<li class="nav-item active">
-        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+      <li class="nav-item active">
+        <a class="nav-link" href="#" (click)="openChangelog()">Changelog <span class="sr-only">(current)</span></a>
       </li>
-      <li class="nav-item">
+      <!--<li class="nav-item">
         <a class="nav-link" href="#">Link</a>
       </li>
       <li class="nav-item">
@@ -35,7 +35,7 @@
 <div class="container main">
   <hr />
   <div class="row">
-    <div class="col-12 col-md-12 col-xl-3">
+    <div class="col-12" [ngClass]="{'col-md-3': !extended, 'col-md-6': extended}">
       <label>Text</label>
       <div class="input-group mb-2 mr-sm-2 mb-sm-0">
         <input type="text" class="form-control" [(ngModel)]="text">
@@ -44,36 +44,55 @@
         </div>
       </div>
     </div>
-    <div class="col-5 col-xl-2">
+    <div class="col-12 col-md-2">
+      <label>Unnecessary steps</label>
+      <input type="number" class="form-control" [(ngModel)]="languageCount">
+    </div>
+    <div *ngIf="!extended" class="col-3">
+      <label>Language</label>
+      <select [(ngModel)]="sourceLanguage" class="form-control">
+        <option *ngFor="let language of languages" value="{{language.code}}">{{language.name}}</option>
+      </select>
+    </div>
+    <div class="col-6 col-md-2">
+      <button *ngIf="!extended" type="button" class="btn btn-primary send" (click)="toggleExtended()">
+        <i  class="fa fa-plus" aria-hidden="true"></i>
+        Extend
+      </button>
+      <button *ngIf="extended" type="button" class="btn btn-primary send" (click)="toggleExtended()">
+        <i class="fa fa-minus" aria-hidden="true"></i>
+        Collapse
+      </button>
+    </div>
+    <div class="col-6 col-md-2">
+      <button type="button" class="btn btn-primary send" (click)="translate()" [disabled]="status.loading">
+        <i *ngIf="status.loading" class="fa fa-spinner fa-pulse fa-fw" aria-hidden="true"></i>
+        Translate
+      </button>
+    </div>
+  </div>
+  <div class="row" *ngIf="extended">
+    <div class="col-4">
       <label>Source language</label>
       <select [(ngModel)]="sourceLanguage" class="form-control">
         <option *ngFor="let language of languages" value="{{language.code}}">{{language.name}}</option>
       </select>
     </div>
-    <div class="col-2 col-xl-1">
+    <div class="col-2">
       <button type="button" class="btn btn-primary send" (click)="changeLanguages()" >
         <i class="fa fa-exchange" aria-hidden="true"></i>
       </button>
     </div>
-    <div class="col-5 col-xl-2">
+    <div class="col-4">
       <label>Destination language</label>
       <select [(ngModel)]="destinationLanguage" class="form-control">
         <option *ngFor="let language of languages" value="{{language.code}}">{{language.name}}</option>
       </select>
     </div>
-    <div class="col-12 col-md-4 col-xl-2">
-      <label>Unnecessary steps</label>
-      <input type="number" class="form-control" [(ngModel)]="languageCount">
-    </div>
-    <div class="col-6 col-md-2 col-xl-1">
+    <div class="col-6 col-md-2">
       <button type="button" class="btn btn-primary send" (click)="randomize()">
         <i class="fa fa-random" aria-hidden="true"></i>
-      </button>
-    </div>
-    <div class="col-6 col-md-2 col-xl-1">
-      <button type="button" class="btn btn-primary send" (click)="translate()" [disabled]="status.loading">
-        <i *ngIf="status.loading" class="fa fa-spinner fa-pulse fa-fw" aria-hidden="true"></i>
-        Translate
+        Randomize
       </button>
     </div>
   </div>
@@ -86,24 +105,69 @@
     </div>
   </div>
   <div class="row">
-    <div class="col-12 col-md-4 translation" *ngFor="let translation of history">
-      <div class="card">
-        <div class="card-header">
-          <h4 [innerHTML]="printTranslationSummary(translation.chain[0])"></h4>
-          <button class="btn btn-sm btn-secondary" data-toggle="tooltip" data-html="true" data-placement="bottom"
-                  title="{{printTranslationChain(translation.chain[0])}}" placement="top"
-                  ngbTooltip="In a short time you will be able to see the full way of your text.">
-            {{translation.chain[0].length - 1}} steps
-          </button>
-          <br />
-          <ngb-rating (rateChange)="updateRating()" [(rate)]="translation.rating" [starTemplate]="t" max="5"></ngb-rating>
+    <ul class="nav nav-tabs col-12" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link active" data-toggle="tab" href="#home" role="tab">My Translations</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#dashboard" role="tab">Global Translations</a>
+      </li>
+      <!--
+      <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#settings" role="tab">Settings</a>
+      </li>
+      -->
+    </ul>
+  </div>
+  <br />
+  <div class="row">
+    <div class="tab-content container">
+      <div class="tab-pane active row" id="home" role="tabpanel">
+        <div class="col-12 col-md-4 translation" *ngFor="let translation of history">
+          <div class="card">
+            <div class="card-header my-translation">
+              <h4 [innerHTML]="printTranslationSummary(translation.chain[0])"></h4>
+              <button *ngIf="loginStatus == 2" class="btn btn-outline-secondary btn-sm" (click)="shareTranslation(translation, share)">
+                <i class="fa fa-external-link" aria-hidden="true"></i>
+              </button>
+              <button class="btn btn-sm btn-secondary" data-toggle="tooltip" data-html="true" data-placement="bottom"
+                      title="{{printTranslationChain(translation.chain[0])}}" placement="top"
+                      ngbTooltip="In a short time you will be able to see the full way of your text.">
+                {{translation.chain[0].length - 1}} steps
+              </button>
+              <br />
+              <ngb-rating (rateChange)="updateRating()" [(rate)]="translation.rating" [starTemplate]="t" max="5"></ngb-rating>
+            </div>
+            <div class="card-block">
+              <p class="card-text">
+                <b>Text: </b>{{translation.text}}<br />
+                <b>Translation: </b>{{translation.translation}}<br />
+              </p>
+            </div>
+          </div>
         </div>
-        <div class="card-block">
-          <p class="card-text">
-            <b>Text: </b>{{translation.text}}<br />
-            <b>Translation: </b>{{translation.translation}}<br />
-          </p>
+      </div>
+      <div class="tab-pane row" id="dashboard" role="tabpanel">
+        <div class="col-12 col-md-4 translation" *ngFor="let translation of dashboard">
+          <div class="card">
+            <div class="card-header" [ngClass]="{'my-translation': translation.uid == userId}">
+              <h4 [innerHTML]="printTranslationSummary(translation.chain[0])"></h4>
+              <button class="btn btn-sm btn-secondary" disabled>
+                {{translation.chain[0].length - 1}} steps
+              </button>
+            </div>
+            <div class="card-block">
+              <p class="card-text">
+                <b>Text: </b>{{translation.text}}<br />
+                <b>Translation: </b>{{translation.translation}}<br />
+              </p>
+            </div>
+          </div>
         </div>
+      </div>
+      <div class="tab-pane" id="settings" role="tabpanel">
+        <h2>Settings</h2><br /><br />
+        <p>There are no settings at the moment. Please come back later.</p>
       </div>
     </div>
   </div>
@@ -219,5 +283,30 @@
       </label>
     </div>
     <br />
+  </div>
+</ng-template>
+
+<ng-template #share let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <h4 class="modal-title">
+      Share translation
+    </h4>
+  </div>
+  <div class="modal-body">
+    <ngb-alert [dismissible]="true" *ngIf="shareStatus == 1" type="danger">
+      Something went wrong. Your translation could not be shared. Please try again later.
+    </ngb-alert>
+    <ngb-alert [dismissible]="true" *ngIf="shareStatus == 2" type="info">
+      You've successfully shared your translation with the world.
+    </ngb-alert>
+
+    <button data-toggle="tooltip" data-html="true" data-placement="bottom" placement="bottom"
+            ngbTooltip="This will allow all users to see your translation and logged in users to rate it."
+            class="btn btn-outline-primary" (click)="shareToDashboard()" *ngIf="!translationToShare.published">
+      Share with the public dashboard
+    </button>
+    <p *ngIf="translationToShare.published">
+      You've already shared your translation with the world. Further options to share your work will follow in the future
+    </p>
   </div>
 </ng-template>
