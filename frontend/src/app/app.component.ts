@@ -230,7 +230,7 @@ export class AppComponent implements OnInit {
   }
 
   translate() {
-    const url = 'https://translate.googleapis.com/translate_a/single?client=gtx';
+    const url = 'https://translation.googleapis.com/language/translate/v2?key=AIzaSyBAEpue6EXR9ktgzypHLNF2oTxopzb3ueU&format=text';
     const source = this.sourceLanguage;
     const destination = this.destinationLanguage ? this.destinationLanguage : this.sourceLanguage;
     const translationSteps = this.languageCount;
@@ -286,7 +286,15 @@ export class AppComponent implements OnInit {
         if (style === 'same' && chain[0][step]) {
           to = chain[0][step];
         } else {
-          to = languages[Math.floor(Math.random() * languages.length)].code;
+          let random = Math.floor(Math.random() * languages.length);
+          to = languages[random].code;
+          if (to === from) {
+            if (random > 0) {
+              to = languages[--random].code;
+            } else {
+              to = languages[++random].code;
+            }
+          }
           if (style === 'same') {
             chain[0].push(to);
           } else {
@@ -295,9 +303,9 @@ export class AppComponent implements OnInit {
         }
       }
 
-      http.get(url + '&sl=' + from + '&tl=' + to + '&dt=t&q=' + text).subscribe((data: any) => {
+      http.get(url + '&source=' + from + '&target=' + to + '&dt=t&q=' + text).subscribe((data: any) => {
         if (step === translationSteps) {
-          translation[index] = data[0][0][0] + (textSplit[index] ? textSplit[index] : '');
+          translation[index] = data.data.translations[0].translatedText + (textSplit[index] ? textSplit[index] : '');
           if (++finished == translation.length) {
             let shortText = translation.join('');
             if (shortText.length > 100) {
@@ -337,7 +345,7 @@ export class AppComponent implements OnInit {
           }
         } else {
           this.status.finishedSteps++;
-          loadTranslationStep.call(this, step + 1, data[0][0][0], index);
+          loadTranslationStep.call(this, step + 1, data.data.translations[0].translatedText, index);
         }
       });
     }
