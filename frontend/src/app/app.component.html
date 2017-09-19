@@ -7,7 +7,10 @@
   <div class="collapse navbar-collapse" id="navbarsExampleDefault">
     <ul class="navbar-nav mr-auto">
       <li class="nav-item active">
-        <a class="nav-link" href="#" (click)="openChangelog()">Changelog <span class="sr-only">(current)</span></a>
+        <a class="nav-link" href="#" (click)="open(howTo)">How to</a>
+      </li>
+      <li class="nav-item active">
+        <a class="nav-link" href="#" (click)="openChangelog()">Changelog</a>
       </li>
       <li class="nav-item active">
         <a class="nav-link" href="#" (click)="open(impressum)">Impressum</a>
@@ -35,7 +38,7 @@
     </div>
     <div class="col-12 col-md-2">
       <label>Unnecessary steps</label>
-      <input type="number" class="form-control" [(ngModel)]="languageCount">
+      <input type="number" class="form-control" [(ngModel)]="languageCount" max="15">
     </div>
     <div *ngIf="!extended" class="col-3">
       <label>Language</label>
@@ -101,11 +104,9 @@
       <li class="nav-item">
         <a class="nav-link" data-toggle="tab" href="#dashboard" role="tab">Global Translations</a>
       </li>
-      <!--
       <li class="nav-item">
         <a class="nav-link" data-toggle="tab" href="#settings" role="tab">Settings</a>
       </li>
-      -->
     </ul>
   </div>
   <br />
@@ -168,9 +169,27 @@
           </div>
         </div>
       </div>
-      <div class="tab-pane" id="settings" role="tabpanel">
-        <h2>Settings</h2><br /><br />
-        <p>There are no settings at the moment. Please come back later.</p>
+      <div class="tab-pane container" id="settings" role="tabpanel">
+        <div class="container">
+          <div class="col-12">
+            <h2>Settings</h2>
+          </div>
+          <div class="col-12">
+
+            <fieldset class="form-group row">
+              <legend class="col-form-legend col-12">Rating emoji</legend>
+              <div class="row">
+                <div class="form-check col-1" *ngFor="let emoji of availableEmojis; let i = index">
+                  <label class="form-check-label" style="font-size: 30px">
+                    <input class="form-check-input" type="radio" name="emoji" id="emoji{{i}}" value="{{i}}"
+                      [checked]="i == selectedEmoji" (click)="onChangeEmoji(i)">
+                    {{emoji}}
+                  </label>
+                </div>
+              </div>
+            </fieldset>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -216,8 +235,8 @@
 </ng-template>
 
 <ng-template #t let-fill="fill">
-  <span *ngIf="fill === 100"><img src="/assets/banana.svg"></span>
-  <span *ngIf="fill === 0"><img src="/assets/banana-o.svg"></span>
+  <span *ngIf="fill === 100" style="font-size: 40px">{{availableEmojis[selectedEmoji]}}</span>
+  <span *ngIf="fill === 0" style="font-size: 40px; opacity: 0.4; filter: grayscale(0.8)">{{availableEmojis[selectedEmoji]}}</span>
 </ng-template>
 
 <ng-template #loginModal let-c="close" let-d="dismiss">
@@ -366,6 +385,32 @@
       Telefon: +4917684347299<br />
       Email: enjoping [at] gmail.com<br />
       Website: lächerbar.de
+    </p>
+  </div>
+</ng-template>
+
+<ng-template #howTo let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <h4 class="modal-title">
+      How to use the translator
+    </h4>
+  </div>
+  <div class="modal-body">
+    <p>
+      You are new to the translator and want to know how to use it? That's nice!<br />
+      The idea of the translator is to take a simple text and use the Google Translate API to remove every sense from
+      it.<br />To do this you can add your text into our "Text" input field. If it is to small for your idea just click
+      the little icon next to it and you will get a big textarea.<br />The "Unnecessary steps field is the most
+      important one. Here you define through how many translations a text should go before it is finally translated into
+      your target language. Every of these unnecessary steps is choosen randomly and so the results can vary every time.
+      <br />The last thing is to select your language. For the best result  you should select the language in which your
+      source text is written.<br /><br />If you want your result to be in a different language then it was before just
+      click on "Extend" and use the two fields "Source Language" and "Destination Language".<br /><br />If you are done
+      just click on "Translate" and Google will do the rest.<br />After the translation is finished you will find it
+      under "My Translations". If you want to share a translation with your friends, just click on the little share
+      icon next to your translation.<br /><br />If you still have questions on how to use the Lächerbar Translator,
+      please use the chat on the bottom right corner of this page.<br /><b>Your Lächerbar-Team</b>
+
     </p>
   </div>
 </ng-template>

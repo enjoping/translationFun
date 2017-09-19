@@ -146,16 +146,18 @@ export class AppComponent implements OnInit {
   };
   changelog = [
     {
+      title: 'Select your rating',
+      date: new Date(2017, 8, 19),
+      description: 'You don\'t like bananas? Or watermelons? That\'s not a problem anymore. Just change your rating ' +
+      'icon to one of our emojis. Currently we offer you a choice out of 12 awesome emojis. Not enough for you? Just ' +
+      'inform us which emoji is missing for you and we will add it.',
+    },
+    {
       title: 'Spread the love!',
       date: new Date(2017, 8, 17),
       description: 'You want to share all your translations with the world? Then have fun with our new feature. You can ' +
       'now share all translations with our open dashboard. All you need to do is create an account and click on the ' +
       'little share button on every translation.',
-    },
-    {
-      title: 'Banana!',
-      date: new Date(2017, 8, 7),
-      description: 'You love bananas as much as we do? Then lets rate your translations with bananas from 1 to 5!',
     },
     {
       title: 'Local History',
@@ -172,6 +174,9 @@ export class AppComponent implements OnInit {
     }
   ];
   translationToShare: any = {};
+
+  availableEmojis = ['🍉', '🦄', '🐳', '🤦', '💩', '🍌', '🌈', '🍔', '🍺', '💡', '❤', '⭐'];
+  selectedEmoji = 0;
 
   adBanners = [
     '<iframe src="https://rcm-eu.amazon-adsystem.com/e/cm?o=3&p=12&l=ur1&category=electronics&banner=1WY69X54P3YBP8EGFYR2&f=ifr&linkID=42f3c77f25bb6575a7490932d399dafa&t=laecherbartra-21&tracking_id=laecherbartra-21" width="300" height="250" scrolling="no" border="0" marginwidth="0" style="border:none;" frameborder="0"></iframe>',
@@ -222,6 +227,7 @@ export class AppComponent implements OnInit {
     }
     if (typeof(Storage) !== 'undefined') {
       this.lastVisit = new Date(localStorage.getItem('translator_last_visit'));
+      this.selectedEmoji = localStorage.getItem('translator_emoji') as any * 1;
       if (!sharedTranslation && this.changelog[0].date > this.lastVisit) {
         window.setTimeout(() => {
           this.modalService.open(this.newsTpl);
@@ -263,7 +269,7 @@ export class AppComponent implements OnInit {
     const url = 'https://translation.googleapis.com/language/translate/v2?key=AIzaSyBAEpue6EXR9ktgzypHLNF2oTxopzb3ueU&format=text';
     const source = this.sourceLanguage;
     const destination = this.destinationLanguage ? this.destinationLanguage : this.sourceLanguage;
-    const translationSteps = this.languageCount > 5 ? 5 : this.languageCount;
+    const translationSteps = this.languageCount > 15 ? 15 : this.languageCount;
     const languages = this.languages;
     const http = this.http;
     const original = this.text;
@@ -521,5 +527,12 @@ export class AppComponent implements OnInit {
   openChangelog() {
     this.lastVisit = new Date(0);
     this.modalService.open(this.newsTpl);
+  }
+
+  onChangeEmoji(index) {
+    this.selectedEmoji = index;
+    if (typeof(Storage) !== 'undefined') {
+      localStorage.setItem('translator_emoji', index);
+    }
   }
 }
