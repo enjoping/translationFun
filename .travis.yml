@@ -1,6 +1,6 @@
 language: node_js
 node_js:
-  - "7"
+  - "6"
 
 branches:
   only:
@@ -22,11 +22,15 @@ install:
 
 script:
     - npm run build
-    - cd frontend
-    - ls | grep -v dist | xargs rm
-    - ls -lah
 
 deploy:
+  provider: elasticbeanstalk
+  access_key_id: AKIAICBN3DTQNYATHTAA
+  secret_access_key:
+    secure: "RrfN03wOXzLBrfiB6naEadNVF3KkMIPZIOjSy3mcrLKo+x19zCT7Y5ob3/mzKWbuDw49QETc9NoNuYigmYYgVCxQfhlkMhC+WlWjeBNRady7KyxJaZEjd71UhXB4MK5ghzAwra8cCa9ptqvQQ8fFFqlFjycV0RAIG/z8mBazwpTsZKxJ9feFO8tng7j4+JT6CNzWVlBKH9s3Ce4RIbBRSD3vwdrmGbysatVeXf1DABvkZnlz3+q2U84NzTPvD++XSVdkGQCG+Zmi65LGv7UznnJgsozQAjZqoPMFQvhtaoWbPk5ZlyXPd3KfgJleaseLWTBOEXcqy8K62oNiY90cMhQS0gkbr/eGywGLMyALdWr6O23pQKjJAtM+/jcq4o0T5IuQtUVXe/cmLFn0QnV/Vvt+Qvs1cDeIjGUpNq+OoDjUanaLjpgLmID7XQjDC1Kdv7E1kw2d+sh84A8sZMkYscNf4GwIfxO8MhQ2rrhNMdN28XxIG3GoF+pNREyFZwyTqfbXfx3d6zri/ONQ9Z+qpaGHd86y0DaeTsDvCVMHEdiazdwzs6q+n1ubetRtwmXbx8X5Q7AxmSKqBz3o9G1U440i6OKum1hSYXScBZCSKJQIj+Wj+CghDFB8SAGqj/vN8h3bzdGYE6wMkiRXU1k7F7y4kTYoGvkPEtjozzWORtY="
+  region: "eu-central-1"
+  app: "Translator"
+  env: "Translator-env"
   skip_cleanup: true
 
 notifications:
