@@ -31,6 +31,7 @@ deploy:
   region: "eu-central-1"
   app: "Translator"
   env: "Translator-env"
+  bucket_name: "elasticbeanstalk-eu-central-1-264024695840"
   skip_cleanup: true
 
 notifications:
