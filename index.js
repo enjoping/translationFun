@@ -17,7 +17,7 @@ const authenticate = expressJwt({secret : secret});
 
 const uuidv1 = require('uuid/v1');
 
-const connection = mongoose.createConnection('mongodb://localhost/translationFun');
+const connection = mongoose.createConnection('mongodb://translator:sPcjCH852Wpg@81.169.243.136:27017/translationFun');
 
 const UserSchema = new mongoose.Schema({
     email: { type: String, required: true },
@@ -42,7 +42,7 @@ app.use(expressSession({
 app.use(passport.initialize());
 
 
-app.use("/", express.static(__dirname + "/../frontend/dist"));
+app.use("/", express.static(__dirname + "/frontend/dist"));
 
 app.post('/rest/1.0/user/register', function (req, res) {
     const user = new userModel({
@@ -238,6 +238,6 @@ app.get('/rest/1.0/translation/:tid', function (req, res) {
     });
 });
 
-app.listen(8010, () => {
-    console.log('Lächerbar translator backend listening on port 8010!');
+app.listen(8081, () => {
+    console.log('Lächerbar translator backend listening on port 8081!');
 });
