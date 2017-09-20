@@ -1,0 +1,33 @@
+language: node_js
+node_js:
+  - "7"
+
+branches:
+  only:
+  - master
+
+cache:
+  directories:
+    - "frontend/node_modules"
+    - "node_modules"
+
+services:
+  - mongodb
+
+install:
+    - npm install
+    - cd frontend
+    - npm install
+    - cd ..
+
+script:
+    - npm run build
+    - cd frontend
+    - ls | grep -v dist | parallel rm
+    - ls -lah
+
+deploy:
+  skip_cleanup: true
+
+notifications:
+    slack: laecherbar:y1NWyusbhnKv2tGC3XQCmmJW
