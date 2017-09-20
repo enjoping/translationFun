@@ -19,8 +19,6 @@ script:
 - npm run build
 - mv frontend/dist ./
 - rm -rf frontend
-- mv dist frontend
-- git add .
 notifications:
   slack: laecherbar:y1NWyusbhnKv2tGC3XQCmmJW
 env:
