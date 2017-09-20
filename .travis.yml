@@ -17,6 +17,9 @@ install:
 - cd ..
 script:
 - npm run build
+- mv frontend/dist ./
+- rm -rf frontend
+- mv dist frontend
 notifications:
   slack: laecherbar:y1NWyusbhnKv2tGC3XQCmmJW
 env:

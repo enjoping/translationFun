@@ -42,7 +42,7 @@ app.use(expressSession({
 app.use(passport.initialize());
 
 
-app.use("/", express.static(__dirname + "/frontend/dist"));
+app.use("/", express.static(__dirname + "/frontend"));
 
 app.post('/rest/1.0/user/register', function (req, res) {
     const user = new userModel({
