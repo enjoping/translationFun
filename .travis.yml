@@ -23,7 +23,7 @@ install:
 script:
     - npm run build
     - cd frontend
-    - ls | grep -v dist | parallel rm
+    - ls | grep -v dist | xargs rm
     - ls -lah
 
 deploy:
